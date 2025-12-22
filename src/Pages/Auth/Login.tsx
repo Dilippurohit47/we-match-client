@@ -1,27 +1,41 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react'; 
 import { motion } from 'framer-motion';
 import { 
-  Sparkles, 
-  Code, 
-  MapPin, 
-  Eye, 
-  EyeOff,
-  Smartphone,
-  Mail,
-  Lock,
-  Users,
-  Zap
+Zap,  User, Calendar, Briefcase, Phone, MapPin, Globe, Clock, 
+  Sparkles, FileText, Linkedin, Github, Code, BookOpen, 
+  Target, X, ArrowLeft, Mail, Lock, Eye, EyeOff, Users 
 } from 'lucide-react';
+import {backendUrl} from '../../helper'
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
-  const [formData, setFormData] = useState({
-    email: '',
-    password: '',
-    username: '',
-    skill: '',
-  });
+const [signupStep, setSignupStep] = useState(6);
+const [signupFormData, setSignupFormData] = useState({
+  email: 'dilippurohit204@gmail.com',
+  password: '123456789@Dilip',
+  fullName: 'Dilip Purohit',
+  
+  age: '22',
+  gender: 'Male',
+  profession: 'Software Engineer',  
+  city: 'bhiwandi',
+  country: 'India',
+  Landmark: 'oswal park',
+
+  oneLiner: 'Looking for coding partner',
+  bio: 'ok ok ok okoko kok oek oeebefbejfbefbe efbeufbeuf ebeubfeufbeu feufeu febfbefne e',
+  portfolio: 'https://dilip-purohit.vercel.app/',  
+  skills: "react backend nodejs",
+  subjects: "b-tech",
+
+  lookingFor: "looking for coding partner",
+  meetupPreference: 'both',
+  maxDistance: 10,
+  minAge: 18,
+  maxAge: 40,
+});
+
 
   const skills = [
     'Fullstack Developer', 'Upsc Aspirant', 'Gate Preparation',
@@ -29,23 +43,136 @@ const Login = () => {
     'Data Science', 'Science', 'Entreprenuer','Founder','Startup'
   ];
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setFormData({
-      ...formData,
-      [e.target.name]: e.target.value
-    });
-  };
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
-  const handleSubmit = (e: React.FormEvent) => {
+const validateStep = (step: number): boolean => {
+  const errors: Record<string, string> = {};
+  switch(step) {
+    case 0: // Basic Info
+      if (!signupFormData.fullName.trim()) {
+        errors.fullName = "Full name is required";
+      } else if (signupFormData.fullName.trim().length < 3) {
+        errors.fullName = "Full name must be at least 3 characters";
+      }
+      
+      if (!signupFormData.email.trim()) {
+        errors.email = "Email is required";
+      } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(signupFormData.email)) {
+        errors.email = "Please enter a valid email address";
+      }
+      
+      if (!signupFormData.password) {
+        errors.password = "Password is required";
+      } else if (signupFormData.password.length < 8) {
+        errors.password = "Password must be at least 8 characters";
+      } else if (!/(?=.*[a-zA-Z])(?=.*\d)/.test(signupFormData.password)) {
+        errors.password = "Password must contain letters and numbers";
+      }
+      break;
+    
+    case 1: // Personal Details
+      if (!signupFormData.age) {
+        errors.age = "Age is required";
+      } else {
+        const age = parseInt(signupFormData.age);
+        if (age < 16) {
+          errors.age = "You must be at least 16 years old";
+        } else if (age > 100) {
+          errors.age = "Please enter a valid age";
+        }
+      }
+      
+      if (!signupFormData.profession) {
+        errors.profession = "Please select your profession";
+      }
+      break;
+    
+    case 2: // Location
+      if (!signupFormData.city.trim()) {
+        errors.city = "City is required";
+      } else if (signupFormData.city.trim().length < 2) {
+        errors.city = "Please enter a valid city name";
+      }
+      
+      if (!signupFormData.country) {
+        errors.country = "Please select your country";
+      }
+      
+      if (!signupFormData.Landmark) {
+        errors.landmark = "Please select your timezone";
+      }
+      break;
+    
+    case 3: // Profile & Bio
+      if (!signupFormData.oneLiner.trim()) {
+        errors.oneLiner = "One-liner is required";
+      } else if (signupFormData.oneLiner.trim().length < 10) {
+        errors.oneLiner = "One-liner should be at least 10 characters";
+      } else if (signupFormData.oneLiner.trim().length > 100) {
+        errors.oneLiner = "One-liner should be less than 100 characters";
+      }
+      if (signupFormData.bio.trim().length > 250) {
+        errors.bio = "Bio should be less than 250 characters";
+      }
+      break;
+    
+    case 4: // Skills
+      if (signupFormData.skills?.split(" ").length === 0) {
+        errors.skills = "Please add at least one skill";
+      } else if (signupFormData.skills?.split(" ").length > 10) {
+        errors.skills = "You can add up to 10 skills maximum";
+      }
+      break;
+    
+    case 5: // Match Preferences
+      if (signupFormData.lookingFor.length === 0) {
+        errors.lookingFor = "Please select what you're looking for";
+      }
+      break;
+  }
+  
+  setValidationErrors(errors);
+  return Object.keys(errors).length === 0;
+};
+
+
+
+
+
+  const handleSubmit = async(e: React.FormEvent) => {
+try {
     e.preventDefault();
-    // Handle login/register logic here
-    console.log('Form submitted:', formData);
+  const response = await fetch(`${backendUrl}/api/v1/auth/sign-up`,{
+    method:"POST",
+    body:JSON.stringify(signupFormData),
+    headers:{
+      "Content-Type":"application/json"
+    }
+  })
+  const data = await response.json()
+  console.log(data)
+} catch (error) {
+  console.log(error)
+}
   };
 
-  const socialLogin = (provider: string) => {
-    console.log(`Login with ${provider}`);
-  };
 
+
+  const getFirstErrorMessage = () => {
+  if (!validationErrors || Object.keys(validationErrors).length === 0) {
+    return null;
+  }
+  const firstKey = Object.keys(validationErrors)[0];
+  return validationErrors[firstKey];
+};
+useEffect(() => {
+  if (Object.keys(validationErrors).length === 0) return;
+  const timer = setTimeout(() => {
+    setValidationErrors({});
+  }, 3000);
+
+  return () => clearTimeout(timer);
+}, [validationErrors]);
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
@@ -173,126 +300,513 @@ const Login = () => {
                 </button>
               </div>
 
-              <form onSubmit={handleSubmit} className="space-y-6">
-                {!isLogin && (
-                  <div>
-                    <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                      <Smartphone className="w-4 h-4" />
-                      Username
-                    </label>
-                    <input
-                      type="text"
-                      name="username"
-                      value={formData.username}
-                      onChange={handleChange}
-                      placeholder="cool_dev_99"
-                      className="w-full px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
-                    />
-                  </div>
-                )}
+           <form className="space-y-6">
+            {
+              validationErrors && <div className='text-red-500 leading-0'>
+                {getFirstErrorMessage()}
+              </div>
+            }
+  <div className='flex gap-1.5 leading-0 items-center'>
+    {signupStep > 0 && (
+      <div 
+        className='cursor-pointer' 
+        onClick={() => setSignupStep(prev => prev - 1)}
+      >
+        <ArrowLeft/>
+      </div>
+    )}
+    <div className='leading-0 capitalize'>
+      Step {signupStep + 1} of 6
+    </div>
+  </div>
 
-                <div>
-                  <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                    <Mail className="w-4 h-4" />
-                    Email
-                  </label>
+  {/* STEP 0: Basic Info */}
+  {signupStep === 0 && (
+    <div className="space-y-4">
+      <div>
+        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+          <User className="w-4 h-4" />
+          Full Name
+        </label>
+        <input
+          type="text"
+          name="fullName"
+          value={signupFormData.fullName}
+          onChange={(e) => setSignupFormData({...signupFormData, fullName: e.target.value})}
+          placeholder="John Doe"
+          className="w-full px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
+          required
+        />
+      </div>
+
+      <div>
+        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+          <Mail className="w-4 h-4" />
+          Email
+        </label>
+        <input
+          type="email"
+          name="email"
+          value={signupFormData.email}
+          onChange={(e) => setSignupFormData({...signupFormData, email: e.target.value})}
+          placeholder="you@example.com"
+          className="w-full px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
+          required
+        />
+      </div>
+
+      <div>
+        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+          <Lock className="w-4 h-4" />
+          Password
+        </label>
+        <div className="relative">
+          <input
+            type={showPassword ? "text" : "password"}
+            name="password"
+            value={signupFormData.password}
+            onChange={(e) => setSignupFormData({...signupFormData, password: e.target.value})}
+            placeholder="••••••••"
+            className="w-full px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
+            required
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+          >
+            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+          </button>
+        </div>
+        <p className="text-xs text-gray-500 mt-1">Minimum 8 characters with letters and numbers</p>
+      </div>
+    </div>
+  )}
+
+  {/* STEP 1: Personal Details */}
+  {signupStep === 1 && (
+    <div className="space-y-4">
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+            <Calendar className="w-4 h-4" />
+            Age
+          </label>
+          <input
+            type="number"
+            name="age"
+            min="16"
+            max="100"
+            value={signupFormData.age}
+            onChange={(e) => setSignupFormData({...signupFormData, age: e.target.value})}
+            placeholder="24"
+            className="w-full px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
+          />
+        </div>
+
+        <div>
+          <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+            <Users className="w-4 h-4" />
+            Gender
+          </label>
+          <select
+            name="gender"
+            value={signupFormData.gender}
+            onChange={(e) => setSignupFormData({...signupFormData, gender: e.target.value})}
+            className="w-full px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
+          >
+            <option value="">Select Gender</option>
+            <option value="male">Male</option>
+            <option value="female">Female</option>
+            <option value="non-binary">Non-binary</option>
+            <option value="prefer-not-to-say">Prefer not to say</option>
+          </select>
+        </div>
+      </div>
+
+      <div>
+        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+          <Briefcase className="w-4 h-4" />
+          Profession
+        </label>
+        <select
+          name="profession"
+          value={signupFormData.profession}
+          onChange={(e) => setSignupFormData({...signupFormData, profession: e.target.value})}
+          className="w-full px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
+          required
+        >
+          <option value="">Select your profession</option>
+          <option value="student">Student</option>
+          <option value="developer">Developer</option>
+          <option value="designer">Designer</option>
+          <option value="founder">Founder</option>
+          <option value="freelancer">Freelancer</option>
+          <option value="job-seeker">Job Seeker</option>
+          <option value="professional">Working Professional</option>
+          <option value="other">Other</option>
+        </select>
+      </div>
+    </div>
+  )}
+
+  {/* STEP 2: Location */}
+  {signupStep === 2 && (
+    <div className="space-y-4">
+      <div>
+        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+          <MapPin className="w-4 h-4" />
+          City
+        </label>
+        <input
+          type="text"
+          name="city"
+          value={signupFormData.city}
+          onChange={(e) => setSignupFormData({...signupFormData, city: e.target.value})}
+          placeholder="Enter your city"
+          className="w-full px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
+          required
+        />
+      </div>
+
+      <div>
+        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+          <Globe className="w-4 h-4" />
+          Country
+        </label>
+        <select
+          name="country"
+          value={signupFormData.country}
+          onChange={(e) => setSignupFormData({...signupFormData, country: e.target.value})}
+          className="w-full px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
+        >
+          <option value="">Select Country</option>
+          <option value="India">India</option>
+          <option value="USA">United States</option>
+          <option value="UK">United Kingdom</option>
+          <option value="Canada">Canada</option>
+          <option value="Australia">Australia</option>
+          <option value="Germany">Germany</option>
+          <option value="Other">Other</option>
+        </select>
+      </div>
+
+      <div>
+        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+          <Clock className="w-4 h-4" />
+          Landmark
+        </label>
+        <input
+          type="text"
+          name="landmark"
+          value={signupFormData.Landmark}
+          onChange={(e) => setSignupFormData({...signupFormData, Landmark: e.target.value})}
+          placeholder="Enter you area name "
+          className="w-full px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
+          required
+        />
+      </div>
+
+      <div className="p-4 rounded-xl bg-gradient-to-r from-purple-50 to-pink-50 border border-purple-100">
+        <div className="flex items-center gap-2 text-sm text-purple-700 mb-2">
+          <MapPin className="w-4 h-4" />
+          <span className="font-medium">Location Matching</span>
+        </div>
+        <p className="text-xs text-purple-600">
+          We'll use your location to find hustlers nearby. You can adjust your visibility in settings.
+        </p>
+      </div>
+    </div>
+  )}
+
+  {/* STEP 3: Profile & Bio */}
+  {signupStep === 3 && (
+    <div className="space-y-4">
+      <div>
+        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+          <Sparkles className="w-4 h-4" />
+          One-liner
+        </label>
+        <input
+          type="text"
+          name="oneLiner"
+          value={signupFormData.oneLiner}
+          onChange={(e) => setSignupFormData({...signupFormData, oneLiner: e.target.value})}
+          placeholder="e.g., Looking for project partner | GATE aspirant | React developer"
+          className="w-full px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
+          required
+        />
+        <p className="text-xs text-gray-500 mt-1">Short tagline that appears on your card</p>
+      </div>
+
+      <div>
+        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+          <FileText className="w-4 h-4" />
+          Bio
+        </label>
+        <textarea
+          name="bio"
+          value={signupFormData.bio}
+          onChange={(e) => setSignupFormData({...signupFormData, bio: e.target.value})}
+          placeholder="Tell us about yourself, your goals, what you're looking for..."
+          rows={3}
+          className="w-full px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all resize-none"
+        />
+        <p className="text-xs text-gray-500 mt-1">Maximum 250 characters</p>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4">
+        <div className=''>
+          <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+            <Linkedin className="w-4 h-4" />
+            Portfolio / Social (Optional)
+          </label>
+          <input
+            type="url"
+            name="portfolio/social"
+            value={signupFormData.portfolio}
+            onChange={(e) => setSignupFormData({...signupFormData, portfolio: e.target.value})}
+            placeholder="Any type of social media or portfolio link where people can see your skills"
+            className="w-full px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
+          />
+        </div>
+
+    
+      </div>
+    </div>
+  )}
+
+  {/* STEP 4: Skills & Subjects */}
+  {signupStep === 4 && (
+    <div className="space-y-6">
+      {/* Skills Section */}
+      <div>
+        <div className="flex flex-col space-y-2 justify-between mb-4">
+          <label className="flex   items-center gap-2 text-sm font-medium text-gray-700">
+            <Code className="w-4 h-4" />
+            Add Your Skills
+          </label>
+            <input
+          type="text"
+          name="oneLiner"
+          value={signupFormData.skills}
+          onChange={(e) => setSignupFormData({...signupFormData, skills: e.target.value})}
+          placeholder="Fashion designer | GATE aspirant | React developer"
+          className="w-full px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
+          required
+        />
+          {/* <span className="text-xs text-gray-500">{signupFormData.skills.length}/10</span> */}
+        </div>
+        
+        <div className="grid grid-cols-2 gap-2 mb-4">
+          {['React', 'Node.js', 'Python', 'UI/UX', 'AWS', 'Docker', 'TypeScript', 'MongoDB'].map(skill => (
+            <button
+              key={skill}
+              type="button"
+              onClick={() => {
+                if (signupFormData.skills.length >= 10) return;
+                const newSkill = skill
+                setSignupFormData({
+                  ...signupFormData, 
+                  skills:`${signupFormData.skills} + ${newSkill}`
+                });
+              }}
+              disabled={signupFormData.skills.length >= 10}
+              className="py-2 px-3 rounded-xl text-sm font-medium bg-gray-100 text-gray-700 hover:bg-gray-200 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+            >
+              + {skill}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Subjects Section */}
+      <div className='space-y-3'>
+        <div className="flex items-center justify-between mb-4 ">
+          <label className="flex items-center gap-2 text-sm font-medium text-gray-700">
+            <BookOpen className="w-4 h-4" />
+            What is your degree or preparing for? 
+          </label>
+        </div>
                   <input
-                    type="email"
-                    name="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    placeholder="you@awesome.dev"
-                    className="w-full px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
-                  />
-                </div>
+          type="text"
+          name="oneLiner"
+          value={signupFormData.subjects}
+          onChange={(e) => setSignupFormData({...signupFormData, subjects: e.target.value})}
+          placeholder="B-tech | 12th board | Mbbs"
+          className="w-full px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
+          required
+        />
+        
+        
+        <div className="grid grid-cols-2 gap-2 mb-4">
+          {['12th','GATE', 'UPSC', 'JEE', 'NEET', 'GRE', 'GMAT', 'CAT', 'Board Exams'].map(exam => (
+            <button
+              key={exam}
+              type="button"
+              onClick={() => {
+                setSignupFormData({
+                  ...signupFormData, 
+                  subjects: `${signupFormData.subjects} ${exam}  `
+                });
+              }}
+              className="py-2 px-3 rounded-xl text-sm font-medium bg-blue-50 text-blue-700 hover:bg-blue-100 transition-all"
+            >
+              + {exam}
+            </button>
+          ))}
+        </div>
+      </div>
+    </div>
+  )}
 
-                <div>
-                  <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                    <Lock className="w-4 h-4" />
-                    Password
-                  </label>
-                  <div className="relative">
-                    <input
-                      type={showPassword ? "text" : "password"}
-                      name="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      placeholder="••••••••"
-                      className="w-full px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
-                    >
-                      {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
-                    </button>
-                  </div>
-                </div>
+  {/* STEP 5: Match Preferences */}
+  {signupStep === 5 && (
+    <div className="space-y-6">
+      <div>
+        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-3">
+          <Target className="w-4 h-4" />
+          What are you actually  looking for?
+        </label>
 
-                {!isLogin && (
-                  <div>
-                    <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
-                      <Code className="w-4 h-4" />
-                      Primary Skill
-                    </label>
-                    <div className="grid grid-cols-3 gap-2">
-                      {skills.slice(0, 6).map((skill) => (
-                        <button
-                          key={skill}
-                          type="button"
-                          onClick={() => setFormData({...formData, skill})}
-                          className={`py-2 px-3 rounded-xl text-sm font-medium transition-all ${formData.skill === skill 
-                            ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md' 
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
-                        >
-                          {skill}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                )}
+          <input
+          type="text"
+          name="oneLiner"
+          value={signupFormData.oneLiner}
+          onChange={(e) => setSignupFormData({...signupFormData, oneLiner: e.target.value})}
+          placeholder="project partner | GATE aspirant | React developer | Co-founder"
+          className="w-full px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
+          required
+        />
+        
+        {/* <div className="grid grid-cols-2 gap-2">
+          {['Study Partner', 'Project Collaborator', 'Mentor', 'Mentee', 'Accountability Buddy', 'Coding Partner', 'Exam Study Group', 'Startup Co-founder'].map(option => (
+            <button
+              key={option}
+              type="button"
+              onClick={() => {
+                const current = signupFormData.lookingFor;
+                if (current.includes(option)) {
+                  setSignupFormData({
+                    ...signupFormData,
+                    lookingFor: current.filter(item => item !== option)
+                  });
+                } else {
+                  setSignupFormData({
+                    ...signupFormData,
+                    lookingFor: [...current, option]
+                  });
+                }
+              }}
+              className={`py-3 rounded-xl text-sm font-medium transition-all ${
+                signupFormData.lookingFor.includes(option)
+                  ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white shadow-md'
+                  : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              }`}
+            >
+              {option}
+            </button>
+          ))}
+        </div> */}
+      </div>
 
-                <button
-                  type="submit"
-                  className="w-full py-3.5 bg-gradient-to-r from-purple-600 to-pink-600 text-white font-semibold rounded-2xl shadow-lg hover:shadow-xl hover:scale-[1.02] active:scale-[0.98] transition-all duration-200"
-                >
-                  {isLogin ? 'Sign In →' : 'Create Account 🚀'}
-                </button>
+      <div className="grid grid-cols-2 gap-4">
+        <div>
+          <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+            <MapPin className="w-4 h-4" />
+            Max Distance
+          </label>
+          <select
+            value={signupFormData.maxDistance}
+            onChange={(e) => setSignupFormData({...signupFormData, maxDistance: parseInt(e.target.value)})}
+            className="w-full px-4  cursor-pointer  py-3 bg-gray-50/50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
+          >
+            <option value="5">Within 5km</option>
+            <option value="10">Within 10km</option>
+            <option value="20">Within 20km</option>
+            <option value="50">Within 50km</option>
+            <option value="100">Any distance</option>
+          </select>
+        </div>
 
-                <div className="text-center">
-                  <a href="#" className="text-sm text-purple-600 hover:text-purple-700 font-medium">
-                    {isLogin ? 'Forgot password?' : 'Already have an account? Sign in'}
-                  </a>
-                </div>
+        <div>
+          <label className="flex items-center  gap-2 text-sm font-medium text-gray-700 mb-2">
+            <Users className="w-4 h-4" />
+            Meetup Preference
+          </label>
+          <select
+            value={signupFormData.meetupPreference}
+            onChange={(e) => setSignupFormData({...signupFormData, meetupPreference: e.target.value})}
+            className="w-full px-4 py-3 cursor-pointer bg-gray-50/50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
+          > 
+            <option value="virtual">Far from me</option>
+            <option value="in-person">Near me</option>
+            <option value="both">Both</option>
+          </select>
+        </div>
+      </div>
 
-                {/* Divider */}
-                <div className="relative">
-                  <div className="absolute inset-0 flex items-center">
-                    <div className="w-full border-t border-gray-300"></div>
-                  </div>
-                  <div className="relative flex justify-center text-sm">
-                    <span className="px-2 bg-white text-gray-500">or continue with</span>
-                  </div>
-                </div>
+      <div className="p-4 rounded-xl bg-gradient-to-r from-blue-50 to-cyan-50 border border-blue-100">
+        <div className="flex items-center gap-2 text-sm text-blue-700 mb-2">
+          <Sparkles className="w-4 h-4" />
+          <span className="font-medium">Almost there! 🎉</span>
+        </div>
+        <p className="text-xs text-blue-600">
+          Your preferences help us find the perfect matches for you. You can always update these later.
+        </p>
+      </div>
+    </div>
+  )}
 
-                {/* Social Login */}
-                <div className="grid grid-cols-1 gap-3  justify-center items-center" >         
-                  <button
-                    type="button"
-                    onClick={() => socialLogin('google')}
-                    className="flex cursor-pointer items-center justify-center gap-2 py-3 bg-white border border-gray-300 font-medium rounded-2xl hover:bg-gray-50 transition-all"
-                  >
-                    <svg className="w-5 h-5" viewBox="0 0 24 24">
-                      <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                      <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                      <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/>
-                      <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                    </svg>
-                    Google
-                  </button>
-                </div>
-              </form>
+  {/* Navigation Buttons */}
+  <div className="space-y-4">
+    {/* Progress Bar */}
+    <div className="w-full bg-gray-200 rounded-full h-2">
+      <div 
+        className="bg-gradient-to-r from-purple-600 to-pink-600 h-2 rounded-full transition-all duration-300"
+        style={{ width: `${((signupStep + 1) / 6) * 100}%` }}
+      ></div>
+    </div>
+
+    <div className="flex gap-3">
+      {signupStep > 0 && (
+        <button
+          type="button"
+          onClick={() => setSignupStep(prev => prev - 1)}
+          className="flex-1 py-3.5 rounded-2xl border border-gray-300 text-gray-700 font-semibold hover:bg-gray-50 transition-all"
+        >
+          ← Back
+        </button>
+      )}
+
+      {signupStep < 5 ? (
+        <button
+          type="button"
+          onClick={() => {
+            // if (validateStep(signupStep)) {
+              setSignupStep(prev => prev + 1);
+            // }
+          }}
+          className={`flex-1 cursor-pointer py-3.5 rounded-2xl font-semibold transition-all ${
+            signupStep === 0 
+              ? 'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:shadow-xl hover:scale-[1.02]'
+              : 'bg-gradient-to-r from-blue-600 to-cyan-600 text-white hover:shadow-xl hover:scale-[1.02]'
+          }`}
+        >
+          Next Step →
+        </button>
+      ) : (
+        <button
+          type="button"
+          onClick={handleSubmit}
+          className="flex-1 py-3.5 rounded-2xl bg-gradient-to-r from-green-600 to-emerald-600 text-white font-semibold hover:shadow-xl hover:scale-[1.02] transition-all"
+        >
+          Complete Signup 🚀
+        </button>
+      )}
+    </div>
+  </div>
+</form>
 
               {/* Terms */}
               <p className="text-xs text-gray-500 text-center mt-8">
