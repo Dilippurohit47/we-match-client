@@ -15,6 +15,7 @@ import {
   Globe,
   Bell
 } from 'lucide-react';
+import Navbar from '@/components/Navbar';
 
 interface DesktopLayoutProps {
   currentUser: UserProfile | undefined;
@@ -127,27 +128,7 @@ const DesktopLayout: React.FC<DesktopLayoutProps> = ({
         {/* Main Content */}
         <div className="flex-1 flex flex-col">
           {/* Top Bar */}
-          <div className="px-6 py-3  border-b border-gray-800/50 bg-gray-900/50 backdrop-blur-sm">
-            <div className="flex items-center justify-between">
-              <div>
-                <h2 className="text-2xl font-bold text-white">Find Your Hustle Crew</h2>
-                <p className="text-gray-400">Connect with skilled people nearby</p>
-              </div>
-              
-              <div className="flex items-center text-white gap-4">
-                <button className="p-2 rounded-xl bg-gradient-to-r from-gray-800 to-gray-900 border border-gray-700">
-                  <Bell className="w-5 h-5" />
-                </button>
-                <button 
-                  onClick={() => setSidebarOpen(!sidebarOpen)}
-                  className="p-2 rounded-xl bg-gradient-to-r from-gray-800 to-gray-900 border border-gray-700"
-                >
-                  <Filter className="w-5 h-5" />
-                </button>
-              </div>
-            </div>
-          </div>
-
+      <Navbar />
           {/* Card Area */}
           <div className="flex-1 p-6 grid grid-cols-3 gap-6">
             {/* Left Panel - User Details */}

@@ -3,6 +3,7 @@ import React, { useEffect } from 'react';
 import { useMatchingLogic } from '../hooks/useMatchingLogic';
 import DesktopLayout from '../layouts/DesktopLayout';
 import MobileLayout from '../layouts/MobileLayout';
+import { backendUrl } from '../helper';
 
 const MainPage: React.FC = () => {
   const {
@@ -56,6 +57,8 @@ const MainPage: React.FC = () => {
     window.addEventListener('keydown', handleKeyPress);
     return () => window.removeEventListener('keydown', handleKeyPress);
   }, [handleSwipe, hasMoreUsers, isMobile]);
+
+
 
   return isMobile ? (
     <MobileLayout

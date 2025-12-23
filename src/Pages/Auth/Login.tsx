@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react'; 
+import React, { useContext, useEffect, useState } from 'react'; 
 import { motion } from 'framer-motion';
 import { 
 Zap,  User, Calendar, Briefcase, Phone, MapPin, Globe, Clock, 
@@ -6,13 +6,15 @@ Zap,  User, Calendar, Briefcase, Phone, MapPin, Globe, Clock,
   Target, X, ArrowLeft, Mail, Lock, Eye, EyeOff, Users 
 } from 'lucide-react';
 import {backendUrl} from '../../helper'
+import { AuthContext } from '@/AuthContext';
+import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
 const [signupStep, setSignupStep] = useState(6);
 const [signupFormData, setSignupFormData] = useState({
-  email: 'dilippurohit204@gmail.com',
+  email: 'dilippurohit958@gmail.com',
   password: '123456789@Dilip',
   fullName: 'Dilip Purohit',
   
@@ -35,6 +37,19 @@ const [signupFormData, setSignupFormData] = useState({
   minAge: 18,
   maxAge: 40,
 });
+  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
+
+const navigate = useNavigate()
+const {refreshUser} = useContext(AuthContext)
+useEffect(() => {
+  if (Object.keys(validationErrors).length === 0) return;
+  const timer = setTimeout(() => {
+    setValidationErrors({});
+  }, 3000);
+
+  return () => clearTimeout(timer);
+}, [validationErrors]);
+
 
 
   const skills = [
@@ -43,7 +58,6 @@ const [signupFormData, setSignupFormData] = useState({
     'Data Science', 'Science', 'Entreprenuer','Founder','Startup'
   ];
 
-  const [validationErrors, setValidationErrors] = useState<Record<string, string>>({});
 
 const validateStep = (step: number): boolean => {
   const errors: Record<string, string> = {};
@@ -147,7 +161,8 @@ try {
     body:JSON.stringify(signupFormData),
     headers:{
       "Content-Type":"application/json"
-    }
+    },
+    credentials:'include'
   })
   const data = await response.json()
   console.log(data)
@@ -165,14 +180,28 @@ try {
   const firstKey = Object.keys(validationErrors)[0];
   return validationErrors[firstKey];
 };
-useEffect(() => {
-  if (Object.keys(validationErrors).length === 0) return;
-  const timer = setTimeout(() => {
-    setValidationErrors({});
-  }, 3000);
 
-  return () => clearTimeout(timer);
-}, [validationErrors]);
+  const login =async() =>{
+  try {
+    const response = await fetch(`${backendUrl}/api/v1/auth/sign-in`,{
+      method:"POST",
+      credentials:"include",
+      headers:{
+        "Content-Type":"application/json"
+      },
+      body:JSON.stringify(signupFormData)
+    })
+
+    if(!response.ok){
+      console.log("err",response)
+      throw new Error()
+    }
+  await refreshUser()
+  } catch (error) {
+    console.log(error)
+  }
+}
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 p-4 md:p-8">
       <div className="max-w-6xl mx-auto">
@@ -300,7 +329,80 @@ useEffect(() => {
                 </button>
               </div>
 
-           <form className="space-y-6">
+  {
+    isLogin ? <form>
+      
+        <div className="space-y-4">
+      <div>
+        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+          <User className="w-4 h-4" />
+          Full Name
+        </label>
+        <input
+          type="text"
+          name="fullName"
+          value={signupFormData.fullName}
+          onChange={(e) => setSignupFormData({...signupFormData, fullName: e.target.value})}
+          placeholder="John Doe"
+          className="w-full px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
+          required
+        />
+      </div>
+
+      <div>
+        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+          <Mail className="w-4 h-4" />
+          Email
+        </label>
+        <input
+          type="email"
+          name="email"
+          value={signupFormData.email}
+          onChange={(e) => setSignupFormData({...signupFormData, email: e.target.value})}
+          placeholder="you@example.com"
+          className="w-full px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
+          required
+        />
+      </div>
+
+      <div>
+        <label className="flex items-center gap-2 text-sm font-medium text-gray-700 mb-2">
+          <Lock className="w-4 h-4" />
+          Password
+        </label>
+        <div className="relative">
+          <input
+            type={showPassword ? "text" : "password"}
+            name="password"
+            value={signupFormData.password}
+            onChange={(e) => setSignupFormData({...signupFormData, password: e.target.value})}
+            placeholder="••••••••"
+            className="w-full px-4 py-3 bg-gray-50/50 border border-gray-200 rounded-2xl focus:ring-2 focus:ring-purple-500 focus:border-transparent outline-none transition-all"
+            required
+          />
+          <button
+            type="button"
+            onClick={() => setShowPassword(!showPassword)}
+            className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-gray-600"
+          >
+            {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+          </button>
+        </div>
+        <p className="text-xs text-gray-500 mt-1">Minimum 8 characters with letters and numbers</p>
+      </div>
+
+  <button
+          type="button"
+          onClick={() => login()}
+          className={`flex-1 w-full cursor-pointer py-3.5 rounded-2xl font-semibold transition-all ${'bg-gradient-to-r from-purple-600 to-pink-600 text-white hover:shadow-xl hover:scale-[1.02]'
+          }`}
+        >
+          Sign In
+        </button>
+
+    </div>
+
+      </form> :          <form className="space-y-6">
             {
               validationErrors && <div className='text-red-500 leading-0'>
                 {getFirstErrorMessage()}
@@ -808,6 +910,8 @@ useEffect(() => {
   </div>
 </form>
 
+
+  }
               {/* Terms */}
               <p className="text-xs text-gray-500 text-center mt-8">
                 By continuing, you agree to our Terms and Privacy Policy.<br />
