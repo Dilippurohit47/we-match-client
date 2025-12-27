@@ -66,7 +66,7 @@ export const useMatchingLogic = () => {
   }, [user?.id]);
 
 
-
+ 
   useEffect(() => {
     // Apply filters
     const filtered = nearbyUsers.filter(user => 

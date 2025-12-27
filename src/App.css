@@ -40,3 +40,7 @@
 .read-the-docs {
   color: #888;
 }
+.fd{
+  outline: 4px;
+  outline-color: rgba(0, 149, 255, 0.732);
+}

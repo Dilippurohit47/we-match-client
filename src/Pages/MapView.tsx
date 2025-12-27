@@ -1,12 +1,21 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useContext, useMemo } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Circle, useMapEvents } from 'react-leaflet';
-import L from 'leaflet';
+import L, { marker } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
+import MarkerClusterGroup from "react-leaflet-cluster";
+// import 'leaflet/dist/leaflet.css';
+// import 'react-leaflet-cluster/dist/styles.min.css';
+
+import 'leaflet.markercluster/dist/MarkerCluster.css';
+import 'leaflet.markercluster/dist/MarkerCluster.Default.css';
 
 // FIX: Fix for default marker icons in React-Leaflet
 import markerIcon2x from 'leaflet/dist/images/marker-icon-2x.png';
 import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
+import { AuthContext } from '@/AuthContext';
+import { backendUrl } from '@/helper';
+import  type { UserProfile  } from '@/types/match';
 
 // Configure Leaflet default icon
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -17,13 +26,13 @@ L.Icon.Default.mergeOptions({
 });
 
 // Custom icon creator
-const createCustomIcon = (isCurrentUser = false, isOnline = true) => {
+const createCustomIcon = (isCurrentUser = false, isOnline = true , fullName) => {
   return L.divIcon({
     html: `
       <div class="relative flex items-center justify-center w-10 h-10 rounded-full border-2 border-white shadow-lg ${
         isCurrentUser ? 'bg-blue-500' : isOnline ? 'bg-green-500' : 'bg-gray-400'
       }">
-        <span class="text-white font-semibold">${isCurrentUser ? 'You' : 'U'}</span>
+        <span class="text-white font-semibold capitalize">${isCurrentUser ? 'You' : fullName.split(" ")[0]}</span>
       </div>
     `,
     className: 'custom-div-icon',
@@ -33,50 +42,117 @@ const createCustomIcon = (isCurrentUser = false, isOnline = true) => {
   });
 };
 
-// Sample user data
-const users = [
-  { id: 1, name: "Alex Johnson", lat: 37.7749, lng: -122.4194, online: true, distance: "0.5km" },
-  { id: 2, name: "Sam Rivera", lat: 37.7740, lng: -122.4180, online: true, distance: "0.8km" },
-  { id: 3, name: "Taylor Swift", lat: 37.7755, lng: -122.4170, online: false, distance: "1.2km" },
-  { id: 4, name: "Jordan Lee", lat: 37.7735, lng: -122.4210, online: true, distance: "1.0km" },
-  { id: 5, name: "Casey Kim", lat: 37.7760, lng: -122.4200, online: false, distance: "1.5km" },
-];
 
-// Component to handle map clicks
-function LocationMarker() {
-  const map = useMapEvents({
-    click() {
-      map.flyTo([37.7749, -122.4194], map.getZoom());
-    },
+
+const createClusterCustomIcon = function (cluster) {
+  return L.divIcon({
+    html: `
+      <div style="
+        background-color: #3b82f6;
+        color: white;
+        border-radius: 9999px;
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        border: 2px solid white;
+          outline: 4px;
+  outline-color: rgba(0, 149, 255, 0.732);
+      ">
+        ${cluster.getChildCount()}
+      </div>
+    `,
+    className: "custom-cluster-icon",
+    iconSize: L.point(40, 40, true),
   });
-  return null;
-}
+};
+
+
+
+// // Component to handle map clicks
+// function LocationMarker() {
+//   const map = useMapEvents({
+//     click() {
+//       // map.flyTo([37.7749, -122.4194], map.getZoom());
+//     },
+//   });
+//   return null;
+// }
 
 const MapView = () => {
   const [currentLocation] = useState({ lat: 37.7749, lng: -122.4194 });
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [radius, setRadius] = useState(5);
-  const [isClient, setIsClient] = useState(false);
+  const {user } = useContext(AuthContext)
+  const  [loading,setLoading] = useState<boolean>(true)
+  const [nearbyUsers ,setNearbyUsers] = useState<UserProfile[] | []>([])
+  const [error,setError] = useState<string | null>(null)
 
-  // Fix for SSR: Ensure component only renders on client side
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
+    useEffect(() => {
+    if (!user?.id) return;
+    const fetchNearbyUsers = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch(
+          `${backendUrl}/api/v1/user/get-nearby-users?userid=${user.id}`,
+          {
+            credentials: "include",
+          }
+        );
 
-  if (!isClient) {
-    return (
-      <div className="h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-500 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading map...</p>
-        </div>
-      </div>
-    );
-  }
+        if (!res.ok) throw new Error("Failed to fetch users");
+        const data = await res.json();
+        setNearbyUsers(data.candidates);
+      } catch (err) {
+        setError("Something went wrong");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNearbyUsers();
+  }, [user?.id]);
+
+    const markers = useMemo(
+  () =>
+    nearbyUsers.map((user) => (
+      <Marker
+        key={user.id}
+        position={[Number(user.lat), Number(user.long)]}
+        icon={createCustomIcon(false, user.online, user.fullName)}
+      >
+        <Popup autoClose={false} closeOnClick={false}>
+          <div className="p-3 min-w-[200px]">
+
+            <div className='flex gap-3'>
+              <img src={user.profilePic} alt="user-avatar" className='h-8 w-8 object-cover  rounded-4xl' />
+              <div>
+            <h3 className="font-bold  capitalize">{user.fullName}</h3>
+          <div className='text-gray-400 text-[12px]'>{user.oneLiner}</div>
+              </div>
+            </div>
+            <p>{user.distance} away</p>
+            <button
+              onClick={() => setSelectedUser(user)}
+              className="mt-4 w-full px-4 py-2 bg-blue-500 text-white rounded-lg"
+            >
+              Send Message
+            </button>
+          </div>
+        </Popup>
+      </Marker>
+    )),
+  [nearbyUsers]
+);
+
+
 
   return (
     <div className="h-screen bg-gray-50 flex flex-col">
       {/* Header */}
+
       <div className="p-6 bg-white border-b">
         <h1 className="text-3xl font-bold text-gray-800">Map View</h1>
         <p className="text-gray-600 mt-1">See nearby users in real-time</p>
@@ -103,7 +179,7 @@ const MapView = () => {
         
         <div className="mt-6">
           <div className="flex justify-between items-center mb-2">
-            <span className="text-gray-700 font-medium">Nearby Users: {users.length}</span>
+            <span className="text-gray-700 font-medium">Nearby Users: {nearbyUsers.length}</span>
             <span className="text-blue-600 font-semibold">Radius: {radius}km</span>
           </div>
           <div className="w-full bg-gray-200 rounded-full h-3">
@@ -120,11 +196,18 @@ const MapView = () => {
         {/* Map Container - Takes 70% of width */}
         <div className="flex-1 relative">
           <div className="absolute inset-0">
-            <MapContainer
-              center={[currentLocation.lat, currentLocation.lng]}
-              zoom={16}
+            {
+              user && <MapContainer
+              center={[user?.lat, user?.long]}
+              zoom={13}
               style={{ height: '100%', width: '100%' }}
               className="z-0"
+              closePopupOnClick={false} 
+                worldCopyJump={false} 
+                scrollWheelZoom="center"
+                  inertia={false}         // 👈 CRITICAL
+                  doubleClickZoom={false}
+
             >
               {/* OpenStreetMap Tiles */}
               <TileLayer
@@ -133,14 +216,15 @@ const MapView = () => {
               />
 
               {/* Current User Location */}
+              {Number.isFinite(user?.lat) && Number.isFinite(user?.long) && ( 
               <Marker
-                position={[currentLocation.lat, currentLocation.lng]}
-                icon={createCustomIcon(true)}
+                position={[user?.lat, user?.long]}
+                icon={createCustomIcon(true  , true , user.fullName)}
               >
                 <Popup>
                   <div className="p-3 min-w-[200px]">
-                    <h3 className="font-bold text-blue-600 text-lg">Your Location</h3>
-                    <p className="text-gray-600 mt-1">San Francisco, California</p>
+                    <h3 className="font-bold text-blue-600 text-lg">{user.city}</h3>
+                    <p className="text-gray-600 mt-1">{user.city}</p>
                     <div className="mt-3 text-sm text-gray-500">
                       <p>📱 Sharing location</p>
                       <p>📍 Center of map view</p>
@@ -148,36 +232,24 @@ const MapView = () => {
                   </div>
                 </Popup>
               </Marker>
+              )}
 
               {/* Nearby Users */}
-              {users.map((user) => (
-                <Marker
-                  key={user.id}
-                  position={[user.lat, user.lng]}
-                  icon={createCustomIcon(false, user.online)}
-                  eventHandlers={{
-                    click: () => setSelectedUser(user),
-                  }}
-                >
-                  <Popup>
-                    <div className="p-3 min-w-[200px]">
-                      <h3 className="font-bold text-gray-800">{user.name}</h3>
-                      <div className="flex items-center mt-2">
-                        <div className={`w-3 h-3 rounded-full mr-2 ${user.online ? 'bg-green-500' : 'bg-gray-400'}`}></div>
-                        <span className="text-sm">{user.online ? 'Online Now' : 'Last seen 2h ago'}</span>
-                      </div>
-                      <p className="text-gray-600 mt-2">{user.distance} away</p>
-                      <button className="mt-4 w-full px-4 py-2 bg-blue-500 hover:bg-blue-600 text-white rounded-lg cursor-pointer transition-colors">
-                        Send Message
-                      </button>
-                    </div>
-                  </Popup>
-                </Marker>
-              ))}
+          <MarkerClusterGroup
+  chunkedLoading
+  maxClusterRadius={500}   // 👈 controls "nearby"
+   zoomToBoundsOnClick={false}   // 👈 CRITICAL
+  spiderfyOnMaxZoom={true}      // 👈 allows clicking individual users
+  showCoverageOnHover={false}  
+   iconCreateFunction={createClusterCustomIcon} 
+>
+{markers}
+</MarkerClusterGroup>
+
 
               {/* Radius Circle */}
               <Circle
-                center={[currentLocation.lat, currentLocation.lng]}
+                center={[user.lat, user.long]}
                 radius={radius * 1000}
                 pathOptions={{ 
                   color: '#3B82F6', 
@@ -187,8 +259,9 @@ const MapView = () => {
                 }}
               />
 
-              <LocationMarker />
+              {/* <LocationMarker /> */}
             </MapContainer>
+            }
           </div>
         </div>
 

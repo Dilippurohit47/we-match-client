@@ -1,21 +1,21 @@
 // src/types/match.ts
 export interface UserProfile {
   id: string;
-  name: string;
+  fullName: string;
   age: number;
   avatar: string;
   skills: string[];
   bio: string;
     city: string;
     distance: number; // in km
-    coordinates?: {
       lat: number;
-      lng: number;
-    };
+      long: number;
   compatibility: number; // 0-100
   intent: 'study' | 'collab' | 'project' | 'mentorship';
   availability: string;
   isOnline: boolean;
+  oneLiner:string,
+  profilePic:string,
 }
 
 export interface MatchFilters {
