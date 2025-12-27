@@ -5,7 +5,7 @@ import { AuthContext } from "../AuthContext";
 
 const Navbar = () => {
   const  {isLoggedIn} = useContext(AuthContext)
-  return     <div className="px-6 py-3  border-b border-gray-800/50 bg-gray-900/50 backdrop-blur-sm">
+  return     <div className="px-6 py-3  border-b  border-gray-800/50 bg-gray-900/50 backdrop-blur-sm">
             <div className="flex items-center justify-between">
               <div>
                 <h2 className="text-2xl font-bold text-white">Find Your Hustle Crew</h2>

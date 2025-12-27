@@ -6,14 +6,12 @@ export interface UserProfile {
   avatar: string;
   skills: string[];
   bio: string;
-  location: {
     city: string;
     distance: number; // in km
     coordinates?: {
       lat: number;
       lng: number;
     };
-  };
   compatibility: number; // 0-100
   intent: 'study' | 'collab' | 'project' | 'mentorship';
   availability: string;

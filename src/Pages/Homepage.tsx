@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useContext } from "react";
 import { motion, useAnimation } from "framer-motion";
 import { 
   Sparkles, 
@@ -27,11 +27,14 @@ import {
   Navigation2,
   Users2
 } from "lucide-react";
+import { AuthContext } from "@/AuthContext";
 
 const Homepage = () => {
   const [activeCategory, setActiveCategory] = useState("all");
   const [userLocation, setUserLocation] = useState(null);
   const controls = useAnimation();
+
+  const {isLoggedIn} = useContext(AuthContext)
 
   useEffect(() => {
     controls.start({ opacity: 1, y: 0 });
@@ -160,9 +163,13 @@ const Homepage = () => {
               <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse"></div>
             </div>
           )}
-          <button className="px-6 py-2 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 font-semibold hover:shadow-lg hover:shadow-purple-500/30 transition-all">
-            Join Waitlist
-          </button>
+        {
+          isLoggedIn ?   <a href="/matching" className="px-6 cursor-pointer py-2 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 font-semibold hover:shadow-lg hover:shadow-purple-500/30 transition-all">
+            Match
+          </a> :   <a href="login" className="px-6 cursor-pointer py-2 rounded-full bg-gradient-to-r from-purple-600 to-pink-600 font-semibold hover:shadow-lg hover:shadow-purple-500/30 transition-all">
+            Login
+          </a>
+        }
         </div>
       </nav>
 

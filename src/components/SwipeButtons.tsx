@@ -1,18 +1,19 @@
 // src/components/SwipeButtons.tsx
 import React from 'react';
-import { X, Heart, Star, Info } from 'lucide-react';
+import { X, Heart, Star, Info, CloudLightning } from 'lucide-react';
 
 interface SwipeButtonsProps {
   onSwipe: (direction: 'left' | 'right' | 'up' | 'down') => void;
   disabled?: boolean;
+  matchedFunction:()=>Promise<void>
 }
 
-const SwipeButtons: React.FC<SwipeButtonsProps> = ({ onSwipe, disabled = false }) => {
+const SwipeButtons: React.FC<SwipeButtonsProps> = ({ onSwipe, disabled = false ,matchedFunction }) => {
   const buttonClasses = `p-4 rounded-full shadow-lg transition-all duration-200 
     ${disabled ? 'opacity-50 cursor-not-allowed' : 'hover:scale-110 active:scale-95'}`;
 
   return (
-    <div className="flex items-center justify-center gap-6">
+    <div className="flex items-center justify-center gap-6 ">
       {/* Pass Button */}
       <button
         disabled={disabled}
@@ -55,7 +56,7 @@ const SwipeButtons: React.FC<SwipeButtonsProps> = ({ onSwipe, disabled = false }
       {/* Like Button */}
       <button
         disabled={disabled}
-        onClick={() => onSwipe('right')}
+        onClick={() => { matchedFunction();onSwipe('right')}}
         className={`
           ${buttonClasses}
           bg-gradient-to-r from-pink-500 to-rose-500

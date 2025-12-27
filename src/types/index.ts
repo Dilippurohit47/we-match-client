@@ -1,5 +1,7 @@
+import type { UserProfile } from "./match"
+
     export  interface AuthProvider {
-        user:string | null,
+        user:UserProfile | null,
         isLoggedIn:boolean
         loading:boolean
       refreshUser: () => Promise<void>,

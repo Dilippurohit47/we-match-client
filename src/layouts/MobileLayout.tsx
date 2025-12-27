@@ -11,6 +11,7 @@ interface MobileLayoutProps {
   onSwipe: (direction: 'left' | 'right' | 'up' | 'down') => void;
   filters: any;
   updateFilters: (filters: any) => void;
+  matchedFunction:()=>Promise<void>
 }
 
 const MobileLayout: React.FC<MobileLayoutProps> = ({
@@ -18,7 +19,8 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({
   nextUsers,
   onSwipe,
   filters,
-  updateFilters
+  updateFilters,
+  matchedFunction
 }) => {
   return (
     <div className="relative h-screen bg-gradient-to-br from-gray-900 via-black to-gray-900 overflow-hidden">
@@ -92,6 +94,7 @@ const MobileLayout: React.FC<MobileLayoutProps> = ({
         <SwipeButtons 
           onSwipe={onSwipe} 
           disabled={!currentUser}
+          matchedFunction={matchedFunction}
         />
       </div>
 

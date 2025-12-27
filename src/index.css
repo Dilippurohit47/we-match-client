@@ -121,3 +121,23 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Fix for Leaflet markers */
+.leaflet-container {
+  font-family: inherit;
+}
+
+.custom-marker {
+  background: none !important;
+  border: none !important;
+}
+
+.leaflet-popup-content {
+  margin: 12px !important;
+  font-family: inherit !important;
+}
+
+.leaflet-popup-content-wrapper {
+  border-radius: 8px !important;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1) !important;
+}

@@ -7,6 +7,11 @@ import MainPage from "./Pages/MainPage"
 import { AuthProvider } from "./AuthContext"
 import {ProtectedRoute} from  "./components/ProtectedRoute"
 import { PublicRoute } from "./components/PublicRoute"
+import SidebarLayout from "./layouts/SidebarLayout"
+import Matches from "./Pages/Matches"
+import NotFound from "./Pages/NotFound"
+import MessagePage from "./Pages/MessagePage"
+import MapView from "./Pages/MapView"
 const App = ()=>{
   return   <AuthProvider>
   <BrowserRouter>
@@ -19,11 +24,17 @@ const App = ()=>{
   </PublicRoute>
   } path="/login" />
 <Route element={<SignUp/>} path="/sign-up" />
-<Route element={
-  <ProtectedRoute>
-  <MainPage/>
-  </ProtectedRoute>
-  } path="/matching" />
+   <Route element={
+        <ProtectedRoute>
+          <SidebarLayout />
+        </ProtectedRoute>
+      }>
+        <Route path="/matching" element={<MainPage />} />
+        <Route path="/matches" element={ <Matches /> } />
+        <Route path="/chat-box" element={<MessagePage />} />
+        <Route path="/map" element={<MapView  />} />
+      </Route>
+      <Route path="*" element={<NotFound/>} />
   </Routes>
   </BrowserRouter>
   </AuthProvider>

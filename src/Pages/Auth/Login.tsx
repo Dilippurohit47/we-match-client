@@ -1,4 +1,4 @@
-import React, { useContext, useEffect, useState } from 'react'; 
+import React, { useContext, useEffect, useState } from 'react';  
 import { motion } from 'framer-motion';
 import { 
 Zap,  User, Calendar, Briefcase, Phone, MapPin, Globe, Clock, 
@@ -12,26 +12,23 @@ import { useNavigate } from 'react-router-dom';
 const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [isLogin, setIsLogin] = useState(true);
-const [signupStep, setSignupStep] = useState(6);
-const [signupFormData, setSignupFormData] = useState({
-  email: 'dilippurohit958@gmail.com',
+  const [signupStep, setSignupStep] = useState(6);
+  const [signupFormData, setSignupFormData] = useState({
+  email: 'ayurvedic@gmail.com',
   password: '123456789@Dilip',
-  fullName: 'Dilip Purohit',
-  
-  age: '22',
+  fullName: 'karan johar ',
+  age: '26',
   gender: 'Male',
-  profession: 'Software Engineer',  
-  city: 'bhiwandi',
+  profession: 'Fashion designer',  
+  city: 'Vadodra',
   country: 'India',
-  Landmark: 'oswal park',
-
-  oneLiner: 'Looking for coding partner',
-  bio: 'ok ok ok okoko kok oek oeebefbejfbefbe efbeufbeuf ebeubfeufbeu feufeu febfbefne e',
+  Landmark: 'Ayurvedic chaar rasta',
+  oneLiner: 'Looking for money minded people',
+  bio: 'Hardwordker mature enough to unnderstand geo-politics',
   portfolio: 'https://dilip-purohit.vercel.app/',  
-  skills: "react backend nodejs",
+  skills: "react tech developer",
   subjects: "b-tech",
-
-  lookingFor: "looking for coding partner",
+  lookingFor: "Fashion desginer,stylers",
   meetupPreference: 'both',
   maxDistance: 10,
   minAge: 18,
@@ -152,20 +149,41 @@ const validateStep = (step: number): boolean => {
 
 
 
+const getLocation = () => {
+  return new Promise((resolve, reject) => {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        resolve({
+          latitude: pos.coords.latitude,
+          longitude: pos.coords.longitude,
+        });
+      },
+      reject,
+      { enableHighAccuracy: true }
+    );
+  });
+};
+
+
 
   const handleSubmit = async(e: React.FormEvent) => {
 try {
     e.preventDefault();
+    const location:any = await getLocation()
   const response = await fetch(`${backendUrl}/api/v1/auth/sign-up`,{
     method:"POST",
-    body:JSON.stringify(signupFormData),
+    body:JSON.stringify({...signupFormData,latitude:location.latitude , longitude:location.longitude}),
     headers:{
       "Content-Type":"application/json"
     },
     credentials:'include'
   })
-  const data = await response.json()
-  console.log(data)
+ 
+    if(!response.ok){
+      console.log("err",response)
+      throw new Error()
+    }
+  await refreshUser()
 } catch (error) {
   console.log(error)
 }

@@ -1,7 +1,7 @@
 // src/components/UserCard.tsx
 import React from 'react';
 import  type { UserProfile } from '../types/match';
-import { MapPin, Users, Zap, Target, Clock, Wifi } from 'lucide-react';
+import { MapPin, Users, Zap } from 'lucide-react';
 
 interface UserCardProps {
   user: UserProfile;
@@ -38,7 +38,6 @@ const UserCard: React.FC<UserCardProps> = ({
     if (score >= 60) return 'from-blue-400 to-cyan-500';
     return 'from-gray-400 to-gray-500';
   };
-
   return (
     <div 
       className={`
@@ -50,11 +49,12 @@ const UserCard: React.FC<UserCardProps> = ({
         ${isActive ? 'cursor-grab active:cursor-grabbing' : 'opacity-60'}
         hover:shadow-purple-500/20 hover:border-purple-500/30
         ${isActive ? 'scale-100' : 'scale-90'}
+        z-[5] shadow-2xl
       `}
       onClick={onCardClick}
     >
       {/* Online Status */}
-      {user.isOnline && (
+      {user?.isOnline && (
         <div className="absolute top-4 right-4 z-10">
           <div className="flex items-center gap-1 px-2 py-1 rounded-full bg-green-500/20 border border-green-500/30">
             <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
@@ -67,7 +67,7 @@ const UserCard: React.FC<UserCardProps> = ({
       <div className={`absolute top-4 left-4 z-10`}>
         <div className={`
           px-3 py-1 rounded-full font-bold text-sm
-          bg-gradient-to-r ${getCompatibilityColor(user.compatibility)} 
+          bg-gradient-to-r ${getCompatibilityColor(user?.compatibility)} 
           text-white shadow-lg
         `}>
           {user.compatibility}% match
@@ -76,8 +76,8 @@ const UserCard: React.FC<UserCardProps> = ({
 
       {/* Gradient Avatar */}
       <div className="relative h-2/5 bg-gradient-to-br from-purple-600/30 to-pink-600/30">
-        <div className="absolute inset-0 flex items-center justify-center">
-          <div className="text-6xl">{user.avatar}</div>
+        <div className="absolute overflow-hidden inset-0 flex items-center justify-center">
+          <img className="object-cover" src={user?.profilePic}  />
           {/* Pulsing ring for active card */}
           {isActive && (
             <div className="absolute inset-0 border-2 border-purple-500/30 rounded-3xl animate-ping"></div>
@@ -85,19 +85,21 @@ const UserCard: React.FC<UserCardProps> = ({
         </div>
         
         {/* Location Badge */}
-        <div className="absolute bottom-4 left-4 flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/40 backdrop-blur-sm">
-          <MapPin className="w-4 h-4" />
-          <span className="text-sm">{user.location.distance}km away</span>
+        <div className="absolute bottom-4 left-4 flex items-center gap-2 px-3 py-1.5 rounded-full bg-black/50 backdrop-blur-sm">
+          <MapPin className="w-4 h-4 text-white" />
+          <span className="text-sm text-white">{user?.distance}km away</span>
         </div>
       </div>
 
       {/* Content */}
       <div className="p-6">
         <div className="mb-4">
-          <h3 className="text-2xl font-bold mb-1">{user.name}, {user.age}</h3>
-          <div className="flex items-center gap-2 text-gray-400">
-            <Target className="w-4 h-4" />
-            <span className="text-sm">{getIntentIcon(user.intent)} Looking for {user.intent} partner</span>
+          <div className="text-2xl font-bold mb-1  flex justify-between  text-white"><div>{user?.fullName}</div> <div>{user?.age} </div></div>
+          <div className='text-zinc-400  leading-5 transform -translate-y-[5.5px]'>
+  {user.profession}
+</div>
+          <div className="flex items-center  gap-2 text-gray-400">
+            <span className="text-sm flex items-center ">{getIntentIcon(user.intent)} {user.oneLiner}</span>
           </div>
         </div>
 
@@ -105,15 +107,15 @@ const UserCard: React.FC<UserCardProps> = ({
         <div className="mb-4">
           <div className="flex items-center gap-2 mb-2">
             <Zap className="w-4 h-4 text-amber-400" />
-            <span className="text-sm font-semibold">Skills</span>
+            <span className="text-sm text-gray-200 font-semibold">Skills</span>
           </div>
           <div className="flex flex-wrap gap-2">
             {user.skills.map((skill, index) => (
               <span 
                 key={index}
-                className="px-3 py-1 rounded-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 text-sm"
+                className="px-3 text-white py-1 rounded-full bg-gradient-to-r from-purple-500/20 to-pink-500/20 border border-purple-500/30 text-sm"
               >
-                {skill}
+                {skill?.name}
               </span>
             ))}
           </div>
@@ -125,12 +127,12 @@ const UserCard: React.FC<UserCardProps> = ({
         {/* Availability */}
         <div className="flex items-center justify-between text-sm text-gray-400">
           <div className="flex items-center gap-1">
-            <Clock className="w-4 h-4" />
-            <span>{user.availability}</span>
+            {/* <Clock className="w-4 h-4" /> */}
+            {/* <span>{user.availability}</span> */}
           </div>
           <div className="flex items-center gap-1">
             <Users className="w-4 h-4" />
-            <span>{user.location.city}</span>
+            <span className='text-zinc-300'>{user.city} , {user.country} </span>
           </div>
         </div>
       </div>

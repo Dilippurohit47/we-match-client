@@ -1,6 +1,8 @@
 // src/hooks/useMatchingLogic.ts
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import type { UserProfile, MatchFilters } from '../types/match';
+import { backendUrl } from '@/helper';
+import { AuthContext } from '@/AuthContext';
 
 // Mock data - replace with your API
 const mockUsers: UserProfile[] = [
@@ -11,21 +13,23 @@ const mockUsers: UserProfile[] = [
     avatar: '👨‍💻',
     skills: ['React', 'TypeScript', 'Node.js', 'UI/UX'],
     bio: 'Building a fintech startup. Looking for a frontend partner who loves clean code!',
-    location: {
       city: 'San Francisco',
-      distance: 1.2
-    },
+      distance: 1.2,
     compatibility: 87,
     intent: 'project',
     availability: 'Weekends',
     isOnline: true
   },
-  // Add more mock users...
 ];
 
+
+
 export const useMatchingLogic = () => {
-  const [users, setUsers] = useState<UserProfile[]>([]);
+    const { user } = useContext(AuthContext);
   const [filteredUsers, setFilteredUsers] = useState<UserProfile[]>([]);
+    const [nearbyUsers, setNearbyUsers] = useState<UserProfile[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<null | string>(null);
   const [filters, setFilters] = useState<MatchFilters>({
     radius: 5,
     skills: [],
@@ -34,20 +38,44 @@ export const useMatchingLogic = () => {
   });
   const [currentIndex, setCurrentIndex] = useState(0);
 
-  useEffect(() => {
-    // Simulate API call
-    setUsers(mockUsers);
-    setFilteredUsers(mockUsers);
-  }, []);
+   useEffect(() => {
+    if (!user?.id) return;
+
+    const fetchNearbyUsers = async () => {
+      try {
+        setLoading(true);
+        const res = await fetch(
+          `${backendUrl}/api/v1/user/get-nearby-users?userid=${user.id}`,
+          {
+            credentials: "include",
+          }
+        );
+
+        if (!res.ok) throw new Error("Failed to fetch users");
+
+        const data = await res.json();
+        setNearbyUsers(data.candidates);
+      } catch (err) {
+        setError("Something went wrong");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchNearbyUsers();
+  }, [user?.id]);
+
+
 
   useEffect(() => {
     // Apply filters
-    const filtered = users.filter(user => 
-      user.location.distance <= filters.radius
+    const filtered = nearbyUsers.filter(user => 
+      user.distance <= filters.radius
     );
+    console.log(filtered)
     setFilteredUsers(filtered);
     setCurrentIndex(0);
-  }, [filters, users]);
+  }, [filters, nearbyUsers]);
 
   const handleSwipe = (direction: 'left' | 'right' | 'up' | 'down') => {
     // Handle swipe logic
