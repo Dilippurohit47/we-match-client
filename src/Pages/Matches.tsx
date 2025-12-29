@@ -24,87 +24,6 @@ const Matches = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [loading,setLoading] = useState(false)
   const [matchedUsers,setMatchedUsers] = useState([])
-  // Mock matched users data
-  // const matchedUsers = [
-  //   {
-  //     id: 1,
-  //     name: 'Alex Chen',
-  //     profession: 'React Developer',
-  //     avatar: '👨‍💻',
-  //     location: '2.1km away',
-  //     matchedDate: 'Today',
-  //     isNew: true,
-  //     lastMessage: 'Hey! Ready to collaborate on that startup idea?',
-  //     commonSkills: ['React', 'TypeScript', 'Node.js'],
-  //     compatibility: 92,
-  //     status: 'online'
-  //   },
-  //   {
-  //     id: 2,
-  //     name: 'Priya Sharma',
-  //     profession: 'UI/UX Designer',
-  //     avatar: '👩‍🎨',
-  //     location: '1.5km away',
-  //     matchedDate: '2 days ago',
-  //     isNew: false,
-  //     lastMessage: 'The design system looks amazing!',
-  //     commonSkills: ['Figma', 'UI/UX', 'React'],
-  //     compatibility: 88,
-  //     status: 'online'
-  //   },
-  //   {
-  //     id: 3,
-  //     name: 'David Park',
-  //     profession: 'GATE Aspirant',
-  //     avatar: '👨‍🎓',
-  //     location: '3.2km away',
-  //     matchedDate: '1 week ago',
-  //     isNew: false,
-  //     lastMessage: 'Let\'s study algorithms this weekend',
-  //     commonSkills: ['Algorithms', 'Mathematics', 'Problem Solving'],
-  //     compatibility: 85,
-  //     status: 'offline'
-  //   },
-  //   {
-  //     id: 4,
-  //     name: 'Sarah Johnson',
-  //     profession: 'Startup Founder',
-  //     avatar: '👩‍💼',
-  //     location: '5.0km away',
-  //     matchedDate: '3 days ago',
-  //     isNew: true,
-  //     lastMessage: 'Have you checked the pitch deck?',
-  //     commonSkills: ['Business', 'Marketing', 'React'],
-  //     compatibility: 90,
-  //     status: 'online'
-  //   },
-  //   {
-  //     id: 5,
-  //     name: 'Mike Taylor',
-  //     profession: 'Full Stack Developer',
-  //     avatar: '👨‍💻',
-  //     location: '4.3km away',
-  //     matchedDate: '2 weeks ago',
-  //     isNew: false,
-  //     lastMessage: 'The backend API is ready for testing',
-  //     commonSkills: ['Node.js', 'React', 'MongoDB'],
-  //     compatibility: 87,
-  //     status: 'away'
-  //   },
-  //   {
-  //     id: 6,
-  //     name: 'Emma Wilson',
-  //     profession: 'NEET Aspirant',
-  //     avatar: '👩‍⚕️',
-  //     location: '2.8km away',
-  //     matchedDate: 'Yesterday',
-  //     isNew: true,
-  //     lastMessage: 'Biology notes are ready to share',
-  //     commonSkills: ['Biology', 'Chemistry', 'Study Groups'],
-  //     compatibility: 83,
-  //     status: 'online'
-  //   },
-  // ];
 
   const filters = [
     { id: 'all', label: 'All Matches', count: matchedUsers?.length },
@@ -400,10 +319,10 @@ console.log("filter",filteredMatches , matchedUsers)
 
                   {/* Action Buttons */}
                   <div className="flex gap-2">
-                    <button className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 text-white font-medium hover:shadow-lg hover:scale-[1.02] transition-all flex items-center justify-center gap-2">
+                    <a href={`/chat-box?id=${match.id}`} className="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600 text-white font-medium hover:shadow-lg hover:scale-[1.02] transition-all flex items-center justify-center gap-2" >
                       <MessageCircle className="w-4 h-4" />
                       Message
-                    </button>
+                    </a>
                     
                     <button className="p-2.5 rounded-xl border border-gray-200 hover:bg-gray-50 transition-colors group/video">
                       <Video className="w-4 h-4 text-gray-600 group-hover/video:text-purple-600" />

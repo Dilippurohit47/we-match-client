@@ -4,22 +4,24 @@ export interface UserProfile {
   fullName: string;
   age: number;
   avatar: string;
-  skills: string[];
+  skills: {name:string}[];
   bio: string;
     city: string;
-    distance: number; // in km
+    distance: number; 
       lat: number;
       long: number;
-  compatibility: number; // 0-100
+  compatibility: number;
   intent: 'study' | 'collab' | 'project' | 'mentorship';
   availability: string;
   isOnline: boolean;
   oneLiner:string,
   profilePic:string,
+subjects:{name:string}[]
+
 }
 
 export interface MatchFilters {
-  radius: number; // in km
+  radius: number; 
   skills: string[];
   intent: string[];
   availability: string[];

@@ -5,5 +5,6 @@ import type { UserProfile } from "./match"
         isLoggedIn:boolean
         loading:boolean
       refreshUser: () => Promise<void>,
-
+      ws: React.MutableRefObject<WebSocket | null>;
+      connectionBooleanRef: React.MutableRefObject<boolean>;
     }  

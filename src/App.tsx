@@ -12,6 +12,7 @@ import Matches from "./Pages/Matches"
 import NotFound from "./Pages/NotFound"
 import MessagePage from "./Pages/MessagePage"
 import MapView from "./Pages/MapView"
+import UsersProfilePage from "./Pages/UsersProfilePage"
 const App = ()=>{
   return   <AuthProvider>
   <BrowserRouter>
@@ -33,6 +34,7 @@ const App = ()=>{
         <Route path="/matches" element={ <Matches /> } />
         <Route path="/chat-box" element={<MessagePage />} />
         <Route path="/map" element={<MapView  />} />
+        <Route path="/user-profile/:userId" element={<UsersProfilePage  />} />
       </Route>
       <Route path="*" element={<NotFound/>} />
   </Routes>

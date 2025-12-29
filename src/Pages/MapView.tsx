@@ -82,7 +82,6 @@ const createClusterCustomIcon = function (cluster) {
 // }
 
 const MapView = () => {
-  const [currentLocation] = useState({ lat: 37.7749, lng: -122.4194 });
   const [selectedUser, setSelectedUser] = useState<any>(null);
   const [radius, setRadius] = useState(5);
   const {user } = useContext(AuthContext)
@@ -133,7 +132,14 @@ const MapView = () => {
           <div className='text-gray-400 text-[12px]'>{user.oneLiner}</div>
               </div>
             </div>
-            <p>{user.distance} away</p>
+            <div className='flex justify-between  items-center'>
+
+            <p>{user.distance} km away</p>
+            <a href={`/user-profile/${user.id}`} className='underline'>
+              view
+            </a>
+            </div>
+
             <button
               onClick={() => setSelectedUser(user)}
               className="mt-4 w-full px-4 py-2 bg-blue-500 text-white rounded-lg"
@@ -150,16 +156,16 @@ const MapView = () => {
 
 
   return (
-    <div className="h-screen bg-gray-50 flex flex-col">
+    <div className="h-screen bg-gray-50 flex flex-col z-0">
       {/* Header */}
 
-      <div className="p-6 bg-white border-b">
+      <div className="px-4 py-3 bg-white border-b">
         <h1 className="text-3xl font-bold text-gray-800">Map View</h1>
-        <p className="text-gray-600 mt-1">See nearby users in real-time</p>
+        <p className="text-gray-600">See nearby users in real-time</p>
       </div>
 
       {/* Location Radius Controls */}
-      <div className="p-6 bg-white border-b">
+      <div className="px-4 py-3 bg-white border-b">
         <h2 className="text-lg font-semibold text-gray-800 mb-4">Location Radius</h2>
         <div className="flex flex-wrap gap-3">
           {[5, 10, 20, 50].map((km) => (
@@ -177,7 +183,7 @@ const MapView = () => {
           ))}
         </div>
         
-        <div className="mt-6">
+        <div className="mt-3">
           <div className="flex justify-between items-center mb-2">
             <span className="text-gray-700 font-medium">Nearby Users: {nearbyUsers.length}</span>
             <span className="text-blue-600 font-semibold">Radius: {radius}km</span>
@@ -195,7 +201,7 @@ const MapView = () => {
       <div className="flex flex-1 overflow-hidden">
         {/* Map Container - Takes 70% of width */}
         <div className="flex-1 relative">
-          <div className="absolute inset-0">
+          <div className="absolute inset-0 z-2">
             {
               user && <MapContainer
               center={[user?.lat, user?.long]}
@@ -205,7 +211,7 @@ const MapView = () => {
               closePopupOnClick={false} 
                 worldCopyJump={false} 
                 scrollWheelZoom="center"
-                  inertia={false}         // 👈 CRITICAL
+                  inertia={false}        
                   doubleClickZoom={false}
 
             >
@@ -237,7 +243,7 @@ const MapView = () => {
               {/* Nearby Users */}
           <MarkerClusterGroup
   chunkedLoading
-  maxClusterRadius={500}   // 👈 controls "nearby"
+  maxClusterRadius={50}   // 👈 controls "nearby"
    zoomToBoundsOnClick={false}   // 👈 CRITICAL
   spiderfyOnMaxZoom={true}      // 👈 allows clicking individual users
   showCoverageOnHover={false}  

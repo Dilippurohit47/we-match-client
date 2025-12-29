@@ -40,9 +40,9 @@ const SidebarLayout = () => {
   return (
     <div>
 
-      <div className=' flex  h-[100vh] w-full bg-gradient-to-br from-gray-900 via-black to-gray-900 '>
-<div className={` ${sidebarOpen ? "mr-[18vw]" : "mr-[0]"}    transition-all duration-300  `}   />
-             <div className={`
+      <div className=' flex  h-[100vh] w-full bg-gradient-to-br from-gray-900 via-black to-gray-900  '>
+<div className={` ${sidebarOpen ? "mr-[18vw]" : "mr-20"}    transition-all duration-300  `}   />
+             <div className={`z-10
           fixed    h-full  bg-black  backdrop-blur-sm border-r border-gray-800/50
           transition-all duration-300 ${sidebarOpen ? 'w-[18vw]' : 'w-20'}
         `}>
