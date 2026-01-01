@@ -9,32 +9,14 @@ import { AuthContext } from "@/AuthContext";
 
 const MessagePage = () => {
   const [loading,setLoading] = useState<boolean>(true)
-  const [chats,setChats] = useState<any[]>([])
   const [selectedChat,setSelectedChat] = useState<UserProfile | null>(null)
   const [searchParams ,setSearchParams] = useSearchParams()
-  const {user} =useContext(AuthContext)
   const selectedUserId = searchParams.get("id")
+  const {user  ,fetchRecentChats  ,recentChats:chats} =useContext(AuthContext)
 
   useEffect(() =>{
-      const fetchMatches = async() =>{
-    try {
-      setLoading(true)
-      const response = await fetch(`${backendUrl}/api/v1/chat/get-recent-chats`,{
-        method:"GET",
-        credentials:"include"
-      })
-      const data = await response.json()
-      if(!response.ok){
-        toast.error(data.error || data.message || "Something went wrong")
-      }  
-      setChats(data.chats)
-    } catch (error) {
-      
-    }finally{
-      setLoading(false)
-    }
-  }
-  fetchMatches()
+    console.log("run")
+fetchRecentChats()
     },[])
 useEffect(() =>{
   if(!selectedUserId) return 
@@ -47,26 +29,15 @@ useEffect(() =>{
     if(!response.ok){
 toast.error(data.message || data.error)
     }
-    setSelectedChat(data.user)
-  }
-
-    const    fetchMessages = async()=>{
-
-      const messages = await fetch(`${backendUrl}/api/v1/messages/get-messages/${selectedUserId}`,{
-        method:"GET",
-        credentials:"include"
-      })
-
-    }
+    setSelectedChat(data.user)}
   fetchUserForChat()
-  fetchMessages()
 },[selectedUserId])
+
 
 const handleSelectChat = (user: UserProfile) => {
   setSelectedChat(user); 
   setSearchParams({ id: user.id });
 };
-
   return (
     <div className="flex h-screen bg-gray-50">
       {/* Chat List Panel */}
@@ -89,9 +60,9 @@ const handleSelectChat = (user: UserProfile) => {
         {/* Chat List */}
        {
         chats.length > 0 &&  <div className="flex-1 overflow-y-auto">
-          {chats.map((chat) => (
+          {chats.map((chat , index) => (
             <div 
-              key={chat.id}
+              key={chat.id + index}
               className={`flex items-center p-4 border-b border-gray-100 hover:bg-gray-50 cursor-pointer transition-colors `}
               onClick={()=>handleSelectChat(chat)}
             >
@@ -124,7 +95,7 @@ const handleSelectChat = (user: UserProfile) => {
        }
       </div>
 
-<ChatWindow  chats={chats} selectedChat={selectedChat} setSelectedChat={setSelectedChat}/>
+<ChatWindow  chats={chats} selectedChat={selectedChat} setSelectedChat={setSelectedChat} setSearchParams={setSearchParams}/>
     </div>
   );
 };

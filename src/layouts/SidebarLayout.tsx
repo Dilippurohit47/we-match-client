@@ -1,7 +1,7 @@
 
 
 // src/layouts/DesktopLayout.tsx
-import React, { useState } from 'react';
+import React, { useContext, useState } from 'react';
 import { 
   Home, 
   MapPin, 
@@ -16,12 +16,14 @@ import {
 import Navbar from '@/components/Navbar';
 import { useMatchingLogic } from '@/hooks/useMatchingLogic';
 import {  Outlet } from "react-router-dom";
+import { AuthContext } from '@/AuthContext';
 // import { GoSidebarExpand } from "react-icons/go";
 
 const SidebarLayout = () => {
 
       const [sidebarOpen, setSidebarOpen] = useState(true);
-        const {
+      const {user}  = useContext(AuthContext)
+         const {
           currentUser,
           nextUsers,
           filters,
@@ -48,8 +50,13 @@ const SidebarLayout = () => {
         `}>
           <div className="p-6">
             <div className="flex items-center gap-3 mb-8">
+              <div className="p-2 rounded-xl overflow-hidden   justify-center flex items-center">
+                {
+                  user?.profilePic ? <img src={user.profilePic} className=' outline-2 outline-gray-300 bg-red-400 h-12 w-12 rounded-full object-cover' /> : 
               <div className="p-2 rounded-xl bg-gradient-to-r from-purple-600 to-pink-600">
                 <Globe className="w-6 h-6" />
+</div>
+                }
               </div>
               {sidebarOpen && (
                 <h1 className="text-xl font-bold bg-gradient-to-r from-purple-400 to-pink-400 bg-clip-text text-transparent">

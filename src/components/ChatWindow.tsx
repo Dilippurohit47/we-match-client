@@ -1,4 +1,5 @@
 import { AuthContext } from '@/AuthContext';
+import { backendUrl } from '@/helper';
 import React, { Children, useContext, useEffect, useState } from 'react'
 import {v4 as uuid} from "uuid"
   const messages = [
@@ -9,18 +10,16 @@ import {v4 as uuid} from "uuid"
     { id: 5, sender: "them", text: "Nice! Are we still meeting tomorrow to discuss it?", time: "10:25 AM" },
     { id: 6, sender: "me", text: "Absolutely! 2 PM still works for me.", time: "10:28 AM" }
   ];
-const ChatWindow = ({chats ,selectedChat ,setSelectedChat} ) => {
+const ChatWindow = ({selectedChat ,setSelectedChat ,setSearchParams} ) => {
 
 const  {ws , user} =useContext(AuthContext)
 const [msgInput,setMsgInput]  = useState("")
 const [messages,SetMessages] = useState([])
-
-
+const [cursorId , setCursorId] = useState<string | undefined>(undefined)
 
 useEffect(() =>{
     if(!ws.current) return
     const handleMessage = async(m:MessageEvent)=>{
-        // console.log("message from websockt",m.toString())
         const data = JSON.parse(m.data)
 
         if(data.type === "personal-msg"){
@@ -29,12 +28,38 @@ useEffect(() =>{
         }
         
     }
+
     ws.current.addEventListener("message",handleMessage)
     return () =>{
         ws.current?.removeEventListener("message",handleMessage)
     }
 },[selectedChat])
 
+useEffect(() =>{
+if(!selectedChat || !user ) return
+console.log("in useeefct")
+if(selectedChat?.unreadCount?.userId === user.id){
+  console.log("updatin")
+  ws.current?.send(JSON.stringify({
+    type:'update-unread-message-count',
+    chatId:selectedChat.chatId,
+    idForUpdate:selectedChat?.unreadCount?.userId
+  }))
+}
+},[selectedChat])
+
+useEffect(() =>{
+    const    fetchMessages = async()=>{
+      const response  = await fetch(`${backendUrl}/api/v1/message/get-messages/${selectedChat?.id}?cursor=${cursorId}`,{
+        method:"GET",
+        credentials:"include"
+      })
+      const data = await response.json()
+      let m = data?.messages.reverse()
+      SetMessages((prev)=>[...m,...prev])
+    }
+  fetchMessages()
+},[selectedChat])
 
 const createMsg = ({content , msgId , senderId, receiverId , isMedia=false}:{content:string , msgId:string , senderId:string , receiverId:string ,isMedia:boolean})=>{
     if(!user) return
@@ -58,7 +83,6 @@ const sendMessage = () =>{
   receiverId: selectedChat.id,
   isMedia:false
 });
-    
     ws.current.send(JSON.stringify({
         type:"personal-msg",
         content:msg?.content,
@@ -69,6 +93,14 @@ const sendMessage = () =>{
     setMsgInput("")
 }
 
+const closeSelectedChat = ()=>{
+  setSearchParams((prev) =>{
+    const params = new URLSearchParams(prev);
+    params.delete("id")
+    return params
+  })
+  setSelectedChat(null)
+}
 
   return ( 
       <div className="w-2/3 flex flex-col">
@@ -92,7 +124,7 @@ const sendMessage = () =>{
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path>
               </svg>
             </button>
-            <button className="text-gray-500 hover:text-gray-700 cursor-pointer" onClick={()=>setSelectedChat(null)}>
+            <button className="text-gray-500 hover:text-gray-700 cursor-pointer" onClick={()=>closeSelectedChat()}>
               <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3"></path>
               </svg>
@@ -109,9 +141,9 @@ const sendMessage = () =>{
         {/* Messages Area */}
         <div className="flex-1 overflow-y-auto p-6 bg-gray-100">
           <div className="space-y-4">
-            { messages?.map((message) => (
+            { messages?.map((message ,index) => (
               <div 
-                key={message.id}
+                key={message.id + index }
                 className={`flex ${message.senderId === user.id ? 'justify-end' : 'justify-start'}`}
               >
                 <div 

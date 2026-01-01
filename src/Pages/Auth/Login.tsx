@@ -14,12 +14,12 @@ const Login = () => {
   const [isLogin, setIsLogin] = useState(true);
   const [signupStep, setSignupStep] = useState(6);
   const [signupFormData, setSignupFormData] = useState({
-  email: 'kaptaan@gmail.com',
+  email: 'spider@gmail.com',
   password: '123456789@Dilip',
-  fullName: 'Kaptaan Amrica ',
+  fullName: 'spider man  ',
   age: '26',
   gender: 'Male',
-  profession: 'Founder of Wematch',  
+  profession: 'Founder of facebook  ',  
   city: 'Vadodra',
   country: 'India',
   Landmark: 'Ayurvedic chaar rasta',

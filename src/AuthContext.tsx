@@ -2,6 +2,7 @@ import React, { createContext, useEffect, useRef, useState } from "react";
 import type { AuthProvider } from "./types";
 import { backendUrl, wsBackendUrl } from "./helper";
 import type { UserProfile } from "./types/match";
+import { toast } from "react-toastify";
 
 
 export const AuthContext = createContext<AuthProvider>({
@@ -10,7 +11,9 @@ export const AuthContext = createContext<AuthProvider>({
   loading: true,
   ws:{current:null},
   refreshUser: async() => {},
-  connectionBooleanRef:{current:false}
+  connectionBooleanRef:{current:false},
+  recentChats:[],
+  fetchRecentChats:async()=>{}
 });
 
 export function AuthProvider({ children }:{children :React.ReactNode}) {
@@ -18,8 +21,9 @@ export function AuthProvider({ children }:{children :React.ReactNode}) {
   const [loading, setLoading] = useState(true);
   const ws = useRef<WebSocket | null>(null)
   const connectionBooleanRef = useRef<boolean>(false);
+  const [recentChats,setRecentChats] = useState([])
 
-  useEffect(() => {
+useEffect(() => {
 refreshUser()
 }, []);
 
@@ -47,7 +51,6 @@ const refreshUser = async () => {
 useEffect(() =>{
 if(user === null) return
 const connect = async()=>{
-  console.log("de")
   ws.current = new WebSocket(`${wsBackendUrl}`)
   ws.current.onopen=() =>{
     if(ws.current?.readyState === WebSocket.OPEN){
@@ -63,7 +66,11 @@ const connect = async()=>{
     connectionBooleanRef.current = false
   }}
 const handleMessages =(m:MessageEvent)=>{
-  // const data = JSON.parse(m.data)
+  const data = JSON.parse(m.data)
+  console.log(data)
+  if(data.type === "get-recent-chats"){
+    setRecentChats(data.chats)
+  }
 }
 connect()
 return ()=>{
@@ -74,8 +81,27 @@ return ()=>{
 }
 },[user])
 
+      const fetchRecentChats = async() =>{
+    try {
+      const response = await fetch(`${backendUrl}/api/v1/chat/get-recent-chats`,{
+        method:"GET",
+        credentials:"include"
+      })
+      const data = await response.json()
+      if(!response.ok){
+        toast.error(data.error || data.message || "Something went wrong")
+      }  
+      console.log("chats got ")
+      setRecentChats(data.chats)
+    } catch (error) { 
+      toast.error(error.message || "something went wrong")
+      console.log("error in getting chats")
+    }
+
+  }
+
   return (
-    <AuthContext.Provider value={{ ws, connectionBooleanRef, user, isLoggedIn: !!user, loading  ,refreshUser}}>
+    <AuthContext.Provider value={{ ws, connectionBooleanRef, user, isLoggedIn: !!user, loading  ,refreshUser ,recentChats ,fetchRecentChats}}>
       {children}
     </AuthContext.Provider>
   );

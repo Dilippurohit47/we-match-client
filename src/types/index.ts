@@ -1,3 +1,4 @@
+import type React from "react";
 import type { UserProfile } from "./match"
 
     export  interface AuthProvider {
@@ -7,4 +8,6 @@ import type { UserProfile } from "./match"
       refreshUser: () => Promise<void>,
       ws: React.MutableRefObject<WebSocket | null>;
       connectionBooleanRef: React.MutableRefObject<boolean>;
+      recentChats:string[]
+      fetchRecentChats:()=>Promise<void>
     }  
